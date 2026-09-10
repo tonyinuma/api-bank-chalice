@@ -14,6 +14,8 @@ class AccountNotFoundError(Exception):
 class AccountNotActiveError(Exception):
     pass
 
+class InsufficientFundsError(Exception):
+    pass
 
 class AccountService:
     def __init__(self, repository: AccountRepository) -> None:
@@ -47,6 +49,29 @@ class AccountService:
             raise AccountNotActiveError()
 
         new_balance = account["balance"] + amount
+
+        return self.repository.update_balance(
+            account_id=account_id,
+            new_balance=new_balance,
+        )
+
+    def withdraw(
+        self,
+        account_id: int,
+        amount: Decimal,
+    ) -> dict:
+        account = self.repository.find_by_id(account_id)
+
+        if account is None:
+            raise AccountNotFoundError()
+
+        if account["status"] != AccountStatus.ACTIVE:
+            raise AccountNotActiveError()
+
+        if account["balance"] < amount:
+            raise InsufficientFundsError()
+
+        new_balance = account["balance"] - amount
 
         return self.repository.update_balance(
             account_id=account_id,

@@ -35,3 +35,9 @@ class DepositRequest(BaseModel):
         gt=0,
         decimal_places=2,
     )
+
+class WithdrawRequest(BaseModel):
+    amount: Decimal = Field(
+        gt=0,
+        decimal_places=2,
+    )

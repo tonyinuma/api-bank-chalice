@@ -10,11 +10,13 @@ from chalicelib.repositories.account_repository import AccountRepository
 from chalicelib.schemas.account import (
     AccountCreate,
     DepositRequest,
+    WithdrawRequest,
 )
 from chalicelib.services.account_service import (
     AccountNotActiveError,
     AccountNotFoundError,
     AccountService,
+    InsufficientFundsError,
 )
 
 app = Chalice(app_name="banking-api")
@@ -89,5 +91,31 @@ def deposit(account_id):
         raise NotFoundError("Account not found")
     except AccountNotActiveError:
         raise ConflictError("Account is not active")
+
+    return serialize_account(account)
+
+@app.route(
+    "/api/v1/accounts/{account_id}/withdraw",
+    methods=["POST"],
+)
+def withdraw(account_id):
+    try:
+        data = WithdrawRequest(
+            **app.current_request.json_body
+        )
+    except ValidationError as exc:
+        raise BadRequestError(str(exc))
+
+    try:
+        account = service.withdraw(
+            account_id=int(account_id),
+            amount=data.amount,
+        )
+    except AccountNotFoundError:
+        raise NotFoundError("Account not found")
+    except AccountNotActiveError:
+        raise ConflictError("Account is not active")
+    except InsufficientFundsError:
+        raise BadRequestError("Insufficient funds")
 
     return serialize_account(account)
