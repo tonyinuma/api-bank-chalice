@@ -38,3 +38,17 @@ class AccountRepository:
             ),
             None,
         )
+
+    def update_balance(
+        self,
+        account_id: int,
+        new_balance: Decimal,
+    ) -> dict | None:
+        account = self.find_by_id(account_id)
+
+        if account is None:
+            return None
+
+        account["balance"] = new_balance
+
+        return account

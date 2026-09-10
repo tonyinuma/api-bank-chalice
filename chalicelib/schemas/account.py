@@ -28,3 +28,10 @@ class AccountResponse(BaseModel):
     currency: Currency
     status: AccountStatus
     balance: Decimal
+
+
+class DepositRequest(BaseModel):
+    amount: Decimal = Field(
+        gt=0,
+        decimal_places=2,
+    )

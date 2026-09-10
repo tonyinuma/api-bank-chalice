@@ -1,13 +1,21 @@
-from chalice import BadRequestError, Chalice, NotFoundError
+from chalice import (
+    BadRequestError,
+    Chalice,
+    ConflictError,
+    NotFoundError,
+)
 from pydantic import ValidationError
 
 from chalicelib.repositories.account_repository import AccountRepository
-from chalicelib.schemas.account import AccountCreate
+from chalicelib.schemas.account import (
+    AccountCreate,
+    DepositRequest,
+)
 from chalicelib.services.account_service import (
+    AccountNotActiveError,
     AccountNotFoundError,
     AccountService,
 )
-
 
 app = Chalice(app_name="banking-api")
 
@@ -57,5 +65,29 @@ def get_account(account_id):
         )
     except AccountNotFoundError:
         raise NotFoundError("Account not found")
+
+    return serialize_account(account)
+
+@app.route(
+    "/api/v1/accounts/{account_id}/deposit",
+    methods=["POST"],
+)
+def deposit(account_id):
+    try:
+        data = DepositRequest(
+            **app.current_request.json_body
+        )
+    except ValidationError as exc:
+        raise BadRequestError(str(exc))
+
+    try:
+        account = service.deposit(
+            account_id=int(account_id),
+            amount=data.amount,
+        )
+    except AccountNotFoundError:
+        raise NotFoundError("Account not found")
+    except AccountNotActiveError:
+        raise ConflictError("Account is not active")
 
     return serialize_account(account)
