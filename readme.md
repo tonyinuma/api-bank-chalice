@@ -134,6 +134,63 @@ curl -X POST http://127.0.0.1:8000/api/v1/accounts/1/withdraw \
   }'
 ```
 
+## Deploy
+
+## Deploy AWS
+
+Configurar el perfil AWS:
+
+```bash
+aws configure set region us-east-1 --profile nombre-perfil-cuenta
+export AWS_PROFILE=nombre-perfil-cuenta
+```
+
+Verificar identidad:
+
+```bash
+aws sts get-caller-identity
+```
+
+Desplegar:
+
+```bash
+chalice deploy
+```
+
+Chalice crea y configura principalmente:
+
+```text
+API Gateway
+Lambda
+IAM Role
+CloudWatch Logs
+```
+
+Para actualizar cambios:
+
+```bash
+chalice deploy
+```
+
+Ver logs:
+
+```bash
+chalice logs
+```
+
+Eliminar los recursos del stage:
+
+```bash
+chalice delete
+```
+
+También puedes usar un perfil solo para un comando:
+
+```bash
+AWS_PROFILE=nombre-perfil-cuenta chalice deploy
+```
+
+
 ## Próximos pasos
 
 ```text
@@ -142,5 +199,4 @@ curl -X POST http://127.0.0.1:8000/api/v1/accounts/1/withdraw \
 [ ] Persistencia
 [ ] DynamoDB / PostgreSQL
 [ ] Tests
-[ ] Deploy AWS
 ```
